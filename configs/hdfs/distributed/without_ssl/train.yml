@@ -1,0 +1,21 @@
+trainer:
+  max_epochs: 1
+  accelerator: gpu
+  devices:
+    - 0
+root_dir: ${oc.env:PWD}
+data:
+  name: cifar
+  config:
+    dir_train: ${root_dir}/datasets/local/train/
+    dir_val: ${root_dir}/datasets/local/val/
+    dir_test: ${root_dir}/datasets/global_test/
+    batch_size: 32
+model:
+  name: cifar
+  config:
+    input_shape: 1
+    mid_shape: 64
+    n_classes: 33
+    n_layers: 2
+    lr: 0.01
