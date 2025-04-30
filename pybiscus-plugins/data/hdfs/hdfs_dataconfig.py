@@ -1,4 +1,4 @@
-from typing import Literal, ClassVar
+from typing import Literal, ClassVar, Optional
 from pydantic import BaseModel, ConfigDict
 
 class ConfigHDFS(BaseModel):
@@ -6,27 +6,29 @@ class ConfigHDFS(BaseModel):
 
     Attributes
     ----------
-    dir_train:   str, optional = the training data directory path (required for clients)
-    dir_val:     str, optional = the validating data directory path (required for clients)
-    dir_test:    str, optional = the testing data directory path (required for server)
+    train_file:   str, optional = the training data directory path (required for clients)
+    test_file:     str, optional = the validating data directory path (required for clients)
+    val_file:    str, optional = the testing data directory path (required for server)
     batch_size:  int, optional = the batch size (default to 32)
-    num_workers: int, optional = the number of workers for the DataLoaders (default to 0)
+    window_size: int, optional = windows size for sequences (default to 10)
     """
+
 
     PYBISCUS_CONFIG: ClassVar[str] = "config"
 
-    num_samples: int = 100
-    feature_dim: int = 1
-    seed:        int = 42
+    train_file:   Optional[str] = "${root_dir}/datasets/train/"
+    test_file:     Optional[str] = "${root_dir}/datasets/val/"
+    val_file:    Optional[str] = "${root_dir}/datasets/test/"
     batch_size:  int = 32
+    window_size: int = 0
 
 # --- Pybiscus HDFS configuration definition 
 
 class ConfigData_RandomVector(BaseModel):
 
-    PYBISCUS_ALIAS: ClassVar[str] = "Random vector"
+    PYBISCUS_ALIAS: ClassVar[str] = "HDFS"
 
-    name:   Literal["randomvector"]
+    name:   Literal["hdfs"]
     config: ConfigHDFS
 
     model_config = ConfigDict(extra="forbid")
