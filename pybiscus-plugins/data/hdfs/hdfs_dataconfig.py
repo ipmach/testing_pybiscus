@@ -20,7 +20,7 @@ class ConfigHDFS(BaseModel):
     test_file:     Optional[str] = "${root_dir}/datasets/val/"
     val_file:    Optional[str] = "${root_dir}/datasets/test/"
     batch_size:  int = 32
-    window_size: int = 0
+    window_size: int = 10
 
 # --- Pybiscus HDFS configuration definition 
 
