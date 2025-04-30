@@ -8,7 +8,7 @@ strategy:
   config:
     min_fit_clients: 2
 model:
-  name: hdfs
+  name: deeplog
   config:
     input_shape: 1
     mid_shape: 64

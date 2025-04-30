@@ -36,9 +36,9 @@ class ConfigDeeplog(BaseModel):
 # edit when the data is ready
 class ConfigModel_hdfs(BaseModel):
 
-    PYBISCUS_ALIAS: ClassVar[str] = "HDFS"
+    PYBISCUS_ALIAS: ClassVar[str] = "DEEPLOG"
 
-    name: Literal["hdfs"]
+    name: Literal["deeplog"]
     config: ConfigDeeplog
 
     model_config = ConfigDict(extra="forbid")

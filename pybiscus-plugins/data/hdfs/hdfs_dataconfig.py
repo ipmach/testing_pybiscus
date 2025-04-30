@@ -16,15 +16,15 @@ class ConfigHDFS(BaseModel):
 
     PYBISCUS_CONFIG: ClassVar[str] = "config"
 
-    train_file:   Optional[str] = "${root_dir}/datasets/train/"
-    test_file:     Optional[str] = "${root_dir}/datasets/val/"
-    val_file:    Optional[str] = "${root_dir}/datasets/test/"
+    train_file:   Optional[str] = None
+    test_file:     Optional[str] = None
+    val_file:    Optional[str] = None
     batch_size:  int = 32
     window_size: int = 10
 
 # --- Pybiscus HDFS configuration definition 
 
-class ConfigData_RandomVector(BaseModel):
+class ConfigData_Hdfs(BaseModel):
 
     PYBISCUS_ALIAS: ClassVar[str] = "HDFS"
 

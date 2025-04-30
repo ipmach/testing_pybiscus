@@ -59,9 +59,9 @@ class HDFSDataset(Dataset):
 class HDFSDataModule(pl.LightningDataModule):
     def __init__(
         self, 
-        train_file: str | None = "path/to/dir", 
-        test_file: str | None = "path/to/dir", 
-        val_file: str | None = "path/to/dir", 
+        train_file: str | None = None, 
+        test_file: str | None = None, 
+        val_file: str | None = None, 
         batch_size: int = 32, 
         window_size: int = 10,
     ):
@@ -84,7 +84,7 @@ class HDFSDataModule(pl.LightningDataModule):
         else:
             self.data_test = None
 
-        if self.data_val is not None:
+        if self.val_file is not None:
             self.data_val = HDFSDataset(data_path=self.val_file,window_size=self.window_size)
         else:
             self.data_val = None

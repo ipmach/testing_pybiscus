@@ -8,6 +8,7 @@ data:
       - cifar10
       - randomvector
       - turbofan
+      - hdfs
 model:
   - path: "./pybiscus-plugins/model"
     modules:
@@ -15,6 +16,7 @@ model:
       - linearregression
       - lstm
       - noop
+      - deeplog
 strategy:
   - path: "./pybiscus-plugins/strategy"
     modules:

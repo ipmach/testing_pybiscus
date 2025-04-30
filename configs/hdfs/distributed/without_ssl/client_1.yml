@@ -4,7 +4,7 @@ fabric:
   accelerator: cpu
 root_dir: ${oc.env:PWD}
 model:
-  name: hdfs
+  name: deeplog
   config:
     input_shape: 1
     mid_shape: 64
