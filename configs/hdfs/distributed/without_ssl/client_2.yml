@@ -1,0 +1,21 @@
+cid: 2
+fabric:
+  accelerator: cpu
+root_dir: ${oc.env:PWD}
+model:
+  name: hdfs
+  config:
+    input_shape: 1
+    mid_shape: 64
+    n_classes: 33
+    lr: 0.01
+    n_layers: 2
+data:
+  name: hdfs
+  config:
+    train_file: ${root_dir}/datasets/hdfs_datasets/train2.csv
+    val_file: ${root_dir}/datasets/hdfs_datasets/val2.csv
+    test_file: None
+    batch_size: 512
+    window_size: 10
+server_adress: ${oc.env:SERVER_ADDRESS, "localhost:22222" }

@@ -1,0 +1,31 @@
+fabric:
+  accelerator: cpu
+root_dir: ${oc.env:PWD}
+logger:
+  subdir: /experiments/federated/test_1/
+strategy:
+  name: "fedavg"
+  config:
+    min_fit_clients: 2
+model:
+  name: hdfs
+  config:
+    input_shape: 1
+    mid_shape: 64
+    n_classes: 33
+    lr: 0.01
+    n_layers: 2
+data:
+  name: hdfs
+  config:
+      train_file: None
+      val_file: None
+      test_file: ${root_dir}/datasets/hdfs_datasets/test_normal.csv
+      batch_size: 512
+      window_size: 10
+server_adress: ${oc.env:SERVICE, "[::]:22222" }
+num_rounds: 2
+client_configs:
+  - ${root_dir}/configs/hdfs/distributed/without_ssl/client_1.yml
+  - ${root_dir}/configs/hdfs/distributed/without_ssl/client_2.yml
+
