@@ -57,7 +57,14 @@ class HDFSDataset(Dataset):
         return self.data[idx] 
 
 class HDFSDataModule(pl.LightningDataModule):
-    def __init__(self, train_file: str = "path/to/dir", test_file: str = "path/to/dir", val_file: str = "path/to/dir", batch_size: int = 32, window_size: int = 10):
+    def __init__(
+        self, 
+        train_file: str | None = "path/to/dir", 
+        test_file: str | None = "path/to/dir", 
+        val_file: str | None = "path/to/dir", 
+        batch_size: int = 32, 
+        window_size: int = 10,
+    ):
         super().__init__()
         self.train_file = train_file
         self.test_file = test_file
@@ -67,17 +74,34 @@ class HDFSDataModule(pl.LightningDataModule):
 
 
     def setup(self, stage: str=None):
-        self.data_train = HDFSDataset(data_path=self.train_file,window_size=self.window_size)
-        self.data_test = HDFSDataset(data_path=self.test_file,window_size=self.window_size)
-        self.data_val = HDFSDataset(data_path=self.val_file,window_size=self.window_size)
+        if self.train_file is not None:
+            self.data_train = HDFSDataset(data_path=self.train_file,window_size=self.window_size)
+        else: 
+            self.data_train = None
+
+        if self.test_file is not None:
+            self.data_test = HDFSDataset(data_path=self.test_file,window_size=self.window_size)
+        else:
+            self.data_test = None
+
+        if self.data_val is not None:
+            self.data_val = HDFSDataset(data_path=self.val_file,window_size=self.window_size)
+        else:
+            self.data_val = None
 
     def train_dataloader(self):
+        if self.data_train is None:
+            raise ValueError("Training data not found.")
         return DataLoader(self.data_train, batch_size=self.batch_size,shuffle=True)
     
     def test_dataloader(self):
+        if self.data_test is None:
+            raise ValueError("Training data not found.")
         return DataLoader(self.data_test, batch_size=self.batch_size,shuffle=False)
     
     def val_dataloader(self):
+        if self.data_val is None:
+            raise ValueError("Training data not found.")
         return DataLoader(self.data_val, batch_size=self.batch_size, shuffle=False)
 
 
