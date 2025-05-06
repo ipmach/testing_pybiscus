@@ -6,7 +6,7 @@ import torch.nn as nn
 from pydantic import BaseModel, ConfigDict, Field
 from torchmetrics import Accuracy
 
-from deeplog import deeplog
+from deeplog import DeepLog
 
 # ------------------------------------------------------------------------------------
 
@@ -108,7 +108,7 @@ class LitDeeplog(pl.LightningModule):
         self.lr          = lr
         self._logging    = _logging
 
-        self.model       = deeplog(input_size=self.input_shape, hidden_size=self.mid_shape, num_layers=self.n_layers, num_keys=self.n_classes)
+        self.model       = DeepLog(input_size=self.input_shape, hidden_size=self.mid_shape, num_layers=self.n_layers, num_keys=self.n_classes)
         self.loss        = nn.CrossEntropyLoss()
         #self.accuracy    = Accuracy(task="multiclass", num_classes=self.n_classes, top_k=1)
         self._signature  = DeeplogSignature
