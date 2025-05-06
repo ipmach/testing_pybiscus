@@ -14,9 +14,8 @@ model:
 data:
   name: hdfs
   config:
-    train_file: ${root_dir}/pybiscus-plugins/data/hdfs/train0.csv
-    val_file: ${root_dir}/pybiscus-plugins/data/hdfs/train0.csv
-    test_file: ${root_dir}/pybiscus-plugins/data/hdfs/train0.csv
+    train_file: ${root_dir}/datasets/hdfs_datasets/train0.csv
+    val_file: ${root_dir}/datasets/hdfs_datasets/val0.csv
     batch_size: 512
     window_size: 10
 server_adress: ${oc.env:SERVER_ADDRESS, "localhost:22222" }

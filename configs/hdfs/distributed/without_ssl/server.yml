@@ -18,8 +18,6 @@ model:
 data:
   name: hdfs
   config:
-      train_file: None
-      val_file: None
       test_file: ${root_dir}/datasets/hdfs_datasets/test_normal.csv
       batch_size: 512
       window_size: 10

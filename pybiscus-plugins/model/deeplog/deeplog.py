@@ -13,12 +13,12 @@ class DeepLog(nn.Module):
                             batch_first=True)
         self.fc = nn.Linear(hidden_size, num_keys)
 
-    def forward(self, features, device):
+    def forward(self, features):
         input0 = features
         h0 = torch.zeros(self.num_layers, input0.size(0),
-                         self.hidden_size).to(device)
+                         self.hidden_size)
         c0 = torch.zeros(self.num_layers, input0.size(0),
-                         self.hidden_size).to(device)
+                         self.hidden_size)
         out, _ = self.lstm(input0, (h0, c0))
         out = self.fc(out[:, -1, :])
         return out

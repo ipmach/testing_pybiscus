@@ -5,6 +5,7 @@ import pandas as pd
 import csv
 import lightning.pytorch as pl
 import numpy as np
+import torch
 
 
 class HDFSDataset(Dataset):
@@ -12,7 +13,7 @@ class HDFSDataset(Dataset):
         super().__init__()
         self.num_classes = 33
         self.window_size = window_size
-        self.data = self.read_data(data_path)
+        self.data, self.labels = self.read_data(data_path)
 
 
 
@@ -30,7 +31,7 @@ class HDFSDataset(Dataset):
 
             data, label = self.preprocess_data(list_of_csv)
         
-        return list(zip(data,label))
+        return data,label
 
     def preprocess_data(self,data):
         result_logs = []
@@ -54,7 +55,7 @@ class HDFSDataset(Dataset):
         return len(self.data)
 
     def __getitem__(self, idx):
-        return self.data[idx] 
+        return torch.tensor(self.data[idx], dtype=torch.float), self.labels[idx]
 
 class HDFSDataModule(pl.LightningDataModule):
     def __init__(
@@ -107,11 +108,11 @@ class HDFSDataModule(pl.LightningDataModule):
 
 if __name__ == "__main__":
 
-    hdfs_dataset = HDFSDataset('train0.csv',10)
+    hdfs_dataset = HDFSDataset('../datasets/hdfs_datasets/test_normal.csv',10)
     print(hdfs_dataset[0])
 
-    module = HDFSDataModule("train0.csv",32,10) 
+    module = HDFSDataModule(test_file='../datasets/hdfs_datasets/test_normal.csv',batch_size=32,window_size=10) 
     module.setup()
-    for seq, label in iter(module.train_dataloader()):
-       print(seq)
+    for seq, label in iter(module.test_dataloader()):
+       print(seq.dtype)
                            

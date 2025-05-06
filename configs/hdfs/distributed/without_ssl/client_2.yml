@@ -13,9 +13,8 @@ model:
 data:
   name: hdfs
   config:
-    train_file: ${root_dir}/datasets/hdfs_datasets/train2.csv
-    val_file: ${root_dir}/datasets/hdfs_datasets/val2.csv
-    test_file: None
+    train_file: ${root_dir}/datasets/hdfs_datasets/train1.csv
+    val_file: ${root_dir}/datasets/hdfs_datasets/val1.csv
     batch_size: 512
     window_size: 10
 server_adress: ${oc.env:SERVER_ADDRESS, "localhost:22222" }

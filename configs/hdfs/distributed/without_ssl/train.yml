@@ -1,18 +1,18 @@
 trainer:
-  max_epochs: 1
+  max_epochs: 10
   accelerator: gpu
   devices:
     - 0
 root_dir: ${oc.env:PWD}
 data:
-  name: cifar
+  name: hdfs
   config:
-    dir_train: ${root_dir}/datasets/local/train/
-    dir_val: ${root_dir}/datasets/local/val/
-    dir_test: ${root_dir}/datasets/global_test/
+    train_file: ${root_dir}/datasets/hdfs_datasets/train0.csv
+    val_file: ${root_dir}/datasets/hdfs_datasets/val0.csv
+    test_file: ${root_dir}/datasets/hdfs_datasets/test_normal.csv
     batch_size: 32
 model:
-  name: cifar
+  name: deeplog
   config:
     input_shape: 1
     mid_shape: 64

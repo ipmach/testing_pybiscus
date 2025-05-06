@@ -6,7 +6,7 @@ import torch.nn as nn
 from pydantic import BaseModel, ConfigDict, Field
 from torchmetrics import Accuracy
 
-from deeplog import DeepLog
+from deeplog.deeplog import DeepLog
 
 # ------------------------------------------------------------------------------------
 
@@ -47,7 +47,7 @@ class ConfigModel_hdfs(BaseModel):
 
 class DeeplogSignature(TypedDict):
     loss: torch.Tensor
-    accuracy: torch.Tensor
+    #accuracy: torch.Tensor
 
 #        --------------------
 
@@ -132,12 +132,12 @@ class LitDeeplog(pl.LightningModule):
         if self._logging:
             self.log("train_loss", loss, prog_bar=True)
 
-        return {"loss": loss, "accuracy": None}
+        return {"loss": loss}
 
     @override
     def validation_step(self, batch: torch.Tensor, batch_idx) -> DeeplogSignature:
         log, labels = batch
-
+ 
         outputs = self.forward(log)
         loss    = self.loss(outputs, labels)
         #acc     = self.accuracy(torch.max(outputs.data, 1)[1], labels)
@@ -146,7 +146,7 @@ class LitDeeplog(pl.LightningModule):
             self.log("val_loss", loss, prog_bar=True)
             #self.log("val_acc",  acc,  prog_bar=True)
 
-        return {"loss": loss, "accuracy": None}
+        return {"loss": loss}
 
     @override
     def test_step(self, batch: torch.Tensor, batch_idx) -> torch.Tensor:
