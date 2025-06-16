@@ -72,6 +72,7 @@ def get_modules_and_configs() -> Tuple[Dict[str, pl.LightningModule], List[BaseM
 ```bash
 uv add needed-library1 needed-library2 ...
 ```
+6. Add the name of the model to the `pybiscus-plugins-conf.yml` in `model` section under `modules`.
 
 ## How to add datasets in Pybiscus
 
@@ -113,6 +114,8 @@ def get_modules_and_configs() -> Tuple[Dict[str, pl.LightningDataModule], List[B
 ```bash
 uv add needed-library1 needed-library2 ...
 ```
+
+6. Add the name of the dataset to the `pybiscus-plugins-conf.yml` in `data` section under `modules`.
 
 ## How to add strategies in Pybiscus
 
