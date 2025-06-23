@@ -14,3 +14,7 @@ saved_models_path
 **/.ruffcache
 **/lightning_logs
 pybiscus-plugins/models/others
+
+# Datasets
+
+datasets/

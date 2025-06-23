@@ -61,14 +61,16 @@ class HDFSDataModule(pl.LightningDataModule):
     def __init__(
         self, 
         train_file: str | None = None, 
-        test_file: str | None = None, 
+        test_file_normal: str | None = None, 
+        test_file_abnormal: str | None = None, 
         val_file: str | None = None, 
         batch_size: int = 32, 
         window_size: int = 10,
     ):
         super().__init__()
         self.train_file = train_file
-        self.test_file = test_file
+        self.test_file_normal = test_file_normal
+        self.test_file_abnormal = test_file_abnormal
         self.val_file = val_file
         self.batch_size = batch_size
         self.window_size = window_size
@@ -80,10 +82,15 @@ class HDFSDataModule(pl.LightningDataModule):
         else: 
             self.data_train = None
 
-        if self.test_file is not None:
-            self.data_test = HDFSDataset(data_path=self.test_file,window_size=self.window_size)
+        if self.test_file_normal is not None:
+            self.data_test_normal = HDFSDataset(data_path=self.test_file_normal,window_size=self.window_size)
         else:
-            self.data_test = None
+            self.data_test_normal = None
+
+        if self.test_file_abnormal is not None:
+            self.data_test_abnormal = HDFSDataset(data_path=self.test_file_abnormal,window_size=self.window_size)
+        else:
+            self.data_test_abnormal = None
 
         if self.val_file is not None:
             self.data_val = HDFSDataset(data_path=self.val_file,window_size=self.window_size)
@@ -95,10 +102,21 @@ class HDFSDataModule(pl.LightningDataModule):
             raise ValueError("Training data not found.")
         return DataLoader(self.data_train, batch_size=self.batch_size,shuffle=True)
     
-    def test_dataloader(self):
-        if self.data_test is None:
-            raise ValueError("Training data not found.")
-        return DataLoader(self.data_test, batch_size=self.batch_size,shuffle=False)
+    # def test_dataloader(self):
+    #     if self.data_test is None:
+    #         raise ValueError("Training data not found.")
+    #     return DataLoader(self.data_test, batch_size=self.batch_size,shuffle=False)
+
+    def test_normal_dataloader(self):
+        if self.data_test_normal is None:
+            raise ValueError("Normal test data not found.")
+        return DataLoader(self.data_test_normal, batch_size=self.batch_size,shuffle=False)
+
+    def test_abnormal_dataloader(self):
+        if self.data_test_abnormal is None:
+            raise ValueError("Abnormal test data not found.")
+        return DataLoader(self.data_test_abnormal, batch_size=self.batch_size,shuffle=False)
+    
     
     def val_dataloader(self):
         if self.data_val is None:
@@ -108,11 +126,11 @@ class HDFSDataModule(pl.LightningDataModule):
 
 if __name__ == "__main__":
 
-    hdfs_dataset = HDFSDataset('../datasets/hdfs_datasets/test_normal.csv',10)
+    hdfs_dataset = HDFSDataset('../datasets/hdfs_datasets/test_abnormal.csv',10)
     print(hdfs_dataset[0])
 
-    module = HDFSDataModule(test_file='../datasets/hdfs_datasets/test_normal.csv',batch_size=32,window_size=10) 
+    module = HDFSDataModule(test_file_abnormal='../datasets/hdfs_datasets/test_abnormal.csv',batch_size=32,window_size=10) 
     module.setup()
-    for seq, label in iter(module.test_dataloader()):
-       print(seq.dtype)
+    for seq, label in iter(module.test_abnormal_dataloader()):
+       print(seq)
                            

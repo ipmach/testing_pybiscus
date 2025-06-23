@@ -19,4 +19,3 @@ data:
     batch_size: 512
     window_size: 10
 server_adress: ${oc.env:SERVER_ADDRESS, "localhost:22222" }
-
