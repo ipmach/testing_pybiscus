@@ -6,6 +6,7 @@ import csv
 import lightning.pytorch as pl
 import numpy as np
 import torch
+import csv 
 
 
 class HDFSDataset(Dataset):
@@ -14,8 +15,6 @@ class HDFSDataset(Dataset):
         self.num_classes = 33
         self.window_size = window_size
         self.data, self.labels = self.read_data(data_path)
-
-
 
     def read_data(self,data_path):
         with open(data_path, 'r') as read_obj: 
@@ -50,6 +49,44 @@ class HDFSDataset(Dataset):
                 labels.append(sequence[i + self.window_size])
 
         return result_logs, labels
+
+    def __len__(self):
+        return len(self.data)
+
+    def __getitem__(self, idx):
+        return torch.tensor(self.data[idx], dtype=torch.float), self.labels[idx]
+    
+
+class HDFSTestDataset(Dataset):
+    def __init__(self, data_path, window_size):
+        super().__init__()
+        self.num_classes = 33
+        self.window_size = window_size
+        self.data, self.labels = self.read_data(data_path)
+
+
+
+    def read_data(self,data_path):
+        test_data = pd.read_csv(data_path)
+        hdfs, length = self.generate(test_data)
+
+        return data,label
+
+    def generate(self,test_data:pd.DataFrame):
+        hdfs_dict = {}
+        labels_dict = {}
+        length = 0
+        for index,row in test_data.iterrows():
+            # Convert strings to integers and shift by -1
+            row_list = row['seq'].split(',')
+            ln = list(map(lambda n: int(n) - 1, row_list))
+            # Pad with -1 to the required length
+            ln = ln + [-1] * (self.window_size + 1 - len(ln))
+            seq_count = hdfs_dict.get(tuple(ln), 0) + 1
+            hdfs_dict[tuple(ln)] = seq_count
+            labels_dict[tuple(ln)] = row['label']
+            length += 1
+        return hdfs_dict, labels_dict,length
 
     def __len__(self):
         return len(self.data)
@@ -102,20 +139,20 @@ class HDFSDataModule(pl.LightningDataModule):
             raise ValueError("Training data not found.")
         return DataLoader(self.data_train, batch_size=self.batch_size,shuffle=True)
     
-    # def test_dataloader(self):
-    #     if self.data_test is None:
-    #         raise ValueError("Training data not found.")
-    #     return DataLoader(self.data_test, batch_size=self.batch_size,shuffle=False)
+    def test_dataloader(self):
+        if self.data_test is None:
+            raise ValueError("Training data not found.")
+        return DataLoader(self.data_test, batch_size=self.batch_size,shuffle=False)
 
-    def test_normal_dataloader(self):
-        if self.data_test_normal is None:
-            raise ValueError("Normal test data not found.")
-        return DataLoader(self.data_test_normal, batch_size=self.batch_size,shuffle=False)
+    # def test_normal_dataloader(self):
+    #     if self.data_test_normal is None:
+    #         raise ValueError("Normal test data not found.")
+    #     return DataLoader(self.data_test_normal, batch_size=self.batch_size,shuffle=False)
 
-    def test_abnormal_dataloader(self):
-        if self.data_test_abnormal is None:
-            raise ValueError("Abnormal test data not found.")
-        return DataLoader(self.data_test_abnormal, batch_size=self.batch_size,shuffle=False)
+    # def test_abnormal_dataloader(self):
+    #     if self.data_test_abnormal is None:
+    #         raise ValueError("Abnormal test data not found.")
+    #     return DataLoader(self.data_test_abnormal, batch_size=self.batch_size,shuffle=False)
     
     
     def val_dataloader(self):
@@ -123,14 +160,40 @@ class HDFSDataModule(pl.LightningDataModule):
             raise ValueError("Training data not found.")
         return DataLoader(self.data_val, batch_size=self.batch_size, shuffle=False)
 
+def generate(window_size,test_data:pd.DataFrame):
+        hdfs_dict = {}
+        labels_dict = {}
+        length = 0
+        for index,row in test_data.iterrows():
+            # Convert strings to integers and shift by -1
+            row_list = row['seq'].split(',')
+            ln = list(map(lambda n: int(n) - 1, row_list))
+            # Pad with -1 to the required length
+            ln = ln + [-1] * (window_size + 1 - len(ln))
+            seq_count = hdfs_dict.get(tuple(ln), 0) + 1
+            hdfs_dict[tuple(ln)] = seq_count
+            labels_dict[tuple(ln)] = row['label']
+            length += 1
+        return hdfs_dict, labels_dict,length
 
 if __name__ == "__main__":
 
-    hdfs_dataset = HDFSDataset('../datasets/hdfs_datasets/test_abnormal.csv',10)
-    print(hdfs_dataset[0])
+    # hdfs_dataset = HDFSDataset('../datasets/hdfs_datasets/test_abnormal.csv',10)
+    # print(hdfs_dataset[0])
 
-    module = HDFSDataModule(test_file_abnormal='../datasets/hdfs_datasets/test_abnormal.csv',batch_size=32,window_size=10) 
-    module.setup()
-    for seq, label in iter(module.test_abnormal_dataloader()):
-       print(seq)
+    # module = HDFSDataModule(train_file='../datasets/hdfs_datasets/train0.csv',batch_size=32,window_size=10) 
+    # module.setup()
+    # for seq, label in iter(module.train_dataloader()):
+    #    print(seq)
+    #    print('--------------------')
+    #    print(len(label))
                            
+    # test_normal = pd.read_csv('../datasets/hdfs_datasets/test_normal.csv',header=None,delimiter=' ')
+    # test_abnormal = pd.read_csv('../datasets/hdfs_datasets/test_abnormal.csv',header=None,delimiter=' ')
+    # test_normal['label']=0
+    # test_abnormal['label']=1
+    # test = pd.concat([test_normal,test_abnormal])
+    # test.to_csv('../datasets/hdfs_datasets/test.csv',index=False)
+    test=pd.read_csv('../datasets/hdfs_datasets/test.csv')
+    hdfs,labels,length = generate(10,test)
+    print(hdfs)
