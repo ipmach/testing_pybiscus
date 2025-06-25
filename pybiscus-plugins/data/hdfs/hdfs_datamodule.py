@@ -60,17 +60,18 @@ class HDFSDataset(Dataset):
 class HDFSTestDataset(Dataset):
     def __init__(self, data_path, window_size):
         super().__init__()
-        self.num_classes = 33
         self.window_size = window_size
-        self.data, self.labels = self.read_data(data_path)
+        self.sequences, self.counts,self.labels = self.read_data(data_path)
 
 
 
     def read_data(self,data_path):
         test_data = pd.read_csv(data_path)
-        hdfs, length = self.generate(test_data)
-
-        return data,label
+        hdfs_dict, labels_dict, length = self.generate(test_data)
+        sequences = list(hdfs_dict.keys())
+        counts = list(hdfs_dict.values())
+        labels = list(labels_dict.values())
+        return sequences,counts,labels
 
     def generate(self,test_data:pd.DataFrame):
         hdfs_dict = {}
@@ -89,25 +90,27 @@ class HDFSTestDataset(Dataset):
         return hdfs_dict, labels_dict,length
 
     def __len__(self):
-        return len(self.data)
+        return len(self.sequences)
 
     def __getitem__(self, idx):
-        return torch.tensor(self.data[idx], dtype=torch.float), self.labels[idx]
+        return torch.tensor(self.sequences[idx], dtype=torch.float), tuple([self.counts[idx],self.labels[idx]])
 
 class HDFSDataModule(pl.LightningDataModule):
     def __init__(
         self, 
         train_file: str | None = None, 
-        test_file_normal: str | None = None, 
-        test_file_abnormal: str | None = None, 
+        test_file: str | None = None, 
+        #test_file_normal: str | None = None, 
+        #test_file_abnormal: str | None = None, 
         val_file: str | None = None, 
         batch_size: int = 32, 
         window_size: int = 10,
     ):
         super().__init__()
         self.train_file = train_file
-        self.test_file_normal = test_file_normal
-        self.test_file_abnormal = test_file_abnormal
+        self.test_file = test_file
+        #self.test_file_normal = test_file_normal
+        #self.test_file_abnormal = test_file_abnormal
         self.val_file = val_file
         self.batch_size = batch_size
         self.window_size = window_size
@@ -119,15 +122,20 @@ class HDFSDataModule(pl.LightningDataModule):
         else: 
             self.data_train = None
 
-        if self.test_file_normal is not None:
-            self.data_test_normal = HDFSDataset(data_path=self.test_file_normal,window_size=self.window_size)
-        else:
-            self.data_test_normal = None
+        # if self.test_file_normal is not None:
+        #     self.data_test_normal = HDFSDataset(data_path=self.test_file_normal,window_size=self.window_size)
+        # else:
+        #     self.data_test_normal = None
 
-        if self.test_file_abnormal is not None:
-            self.data_test_abnormal = HDFSDataset(data_path=self.test_file_abnormal,window_size=self.window_size)
+        # if self.test_file_abnormal is not None:
+        #     self.data_test_abnormal = HDFSDataset(data_path=self.test_file_abnormal,window_size=self.window_size)
+        # else:
+        #     self.data_test_abnormal = None
+
+        if self.test_file is not None:
+            self.data_test = HDFSTestDataset(data_path=self.test_file,window_size=self.window_size)
         else:
-            self.data_test_abnormal = None
+            self.data_test = None
 
         if self.val_file is not None:
             self.data_val = HDFSDataset(data_path=self.val_file,window_size=self.window_size)
@@ -142,7 +150,7 @@ class HDFSDataModule(pl.LightningDataModule):
     def test_dataloader(self):
         if self.data_test is None:
             raise ValueError("Training data not found.")
-        return DataLoader(self.data_test, batch_size=self.batch_size,shuffle=False)
+        return DataLoader(self.data_test, batch_size=None,shuffle=False)
 
     # def test_normal_dataloader(self):
     #     if self.data_test_normal is None:
@@ -181,7 +189,10 @@ if __name__ == "__main__":
     # hdfs_dataset = HDFSDataset('../datasets/hdfs_datasets/test_abnormal.csv',10)
     # print(hdfs_dataset[0])
 
-    # module = HDFSDataModule(train_file='../datasets/hdfs_datasets/train0.csv',batch_size=32,window_size=10) 
+    module = HDFSDataModule(test_file='../datasets/hdfs_datasets/test.csv',batch_size=32,window_size=10)
+    module.setup()
+    for seq, pair in iter(module.test_dataloader()):
+        print(seq,pair)
     # module.setup()
     # for seq, label in iter(module.train_dataloader()):
     #    print(seq)
@@ -194,6 +205,6 @@ if __name__ == "__main__":
     # test_abnormal['label']=1
     # test = pd.concat([test_normal,test_abnormal])
     # test.to_csv('../datasets/hdfs_datasets/test.csv',index=False)
-    test=pd.read_csv('../datasets/hdfs_datasets/test.csv')
-    hdfs,labels,length = generate(10,test)
-    print(hdfs)
+    #test=pd.read_csv('../datasets/hdfs_datasets/test.csv')
+    #hdfs,labels,length = generate(10,test)
+    #print(hdfs)
