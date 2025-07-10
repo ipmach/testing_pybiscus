@@ -7,7 +7,7 @@ import lightning.pytorch as pl
 import numpy as np
 import torch
 import csv 
-
+from typing import override, Optional
 
 class HDFSDataset(Dataset):
     def __init__(self, data_path, window_size):
@@ -63,7 +63,10 @@ class HDFSTestDataset(Dataset):
         self.window_size = window_size
         self.sequences, self.counts,self.labels = self.read_data(data_path)
 
-
+    
+    def pad_list_of_lists(self,sequences,pad_value=0):
+        max_len = max(len(seq) for seq in sequences)
+        return [list(seq) + [pad_value] * (max_len - len(seq)) for seq in sequences]
 
     def read_data(self,data_path):
         test_data = pd.read_csv(data_path)
@@ -71,7 +74,10 @@ class HDFSTestDataset(Dataset):
         sequences = list(hdfs_dict.keys())
         counts = list(hdfs_dict.values())
         labels = list(labels_dict.values())
-        return sequences,counts,labels
+        sequences_padded = self.pad_list_of_lists(sequences,pad_value=-99)
+        return sequences_padded,counts,labels
+    
+
 
     def generate(self,test_data:pd.DataFrame):
         hdfs_dict = {}
@@ -109,80 +115,58 @@ class HDFSDataModule(pl.LightningDataModule):
         super().__init__()
         self.train_file = train_file
         self.test_file = test_file
-        #self.test_file_normal = test_file_normal
-        #self.test_file_abnormal = test_file_abnormal
         self.val_file = val_file
         self.batch_size = batch_size
         self.window_size = window_size
 
-
     def setup(self, stage: str=None):
-        if self.train_file is not None:
-            self.data_train = HDFSDataset(data_path=self.train_file,window_size=self.window_size)
-        else: 
-            self.data_train = None
+        """
+        Data downloaded according to stage:
 
-        # if self.test_file_normal is not None:
-        #     self.data_test_normal = HDFSDataset(data_path=self.test_file_normal,window_size=self.window_size)
-        # else:
-        #     self.data_test_normal = None
+                   | Train | Val | Test |
+            -----------------------------
+            "fit"  |   X   |  X  |  _   |
+            -----------------------------
+            "test" |   _   |  _  |  X   |
+            -----------------------------
+            None   |   X   |  X  |  X   |
+            -----------------------------
+        """
+        if stage == "fit" or stage is None:
+            if self.train_file is not None:
+                self.data_train = HDFSDataset(data_path=self.train_file,window_size=self.window_size)
+            else: 
+                self.data_train = None
+            
+            if self.val_file is not None:
+                self.data_val = HDFSDataset(data_path=self.val_file,window_size=self.window_size)
+            else:
+                self.data_val = None
 
-        # if self.test_file_abnormal is not None:
-        #     self.data_test_abnormal = HDFSDataset(data_path=self.test_file_abnormal,window_size=self.window_size)
-        # else:
-        #     self.data_test_abnormal = None
+        if stage == "test" or stage is None:
+            if self.test_file is not None:
+                self.data_test = HDFSTestDataset(data_path=self.test_file,window_size=self.window_size)
+            else:
+                self.data_test = None
 
-        if self.test_file is not None:
-            self.data_test = HDFSTestDataset(data_path=self.test_file,window_size=self.window_size)
-        else:
-            self.data_test = None
-
-        if self.val_file is not None:
-            self.data_val = HDFSDataset(data_path=self.val_file,window_size=self.window_size)
-        else:
-            self.data_val = None
-
+        
+    @override
     def train_dataloader(self):
         if self.data_train is None:
             raise ValueError("Training data not found.")
         return DataLoader(self.data_train, batch_size=self.batch_size,shuffle=True)
     
+    @override
     def test_dataloader(self):
         if self.data_test is None:
-            raise ValueError("Training data not found.")
-        return DataLoader(self.data_test, batch_size=None,shuffle=False)
-
-    # def test_normal_dataloader(self):
-    #     if self.data_test_normal is None:
-    #         raise ValueError("Normal test data not found.")
-    #     return DataLoader(self.data_test_normal, batch_size=self.batch_size,shuffle=False)
-
-    # def test_abnormal_dataloader(self):
-    #     if self.data_test_abnormal is None:
-    #         raise ValueError("Abnormal test data not found.")
-    #     return DataLoader(self.data_test_abnormal, batch_size=self.batch_size,shuffle=False)
+            raise ValueError("Test data not found.")
+        return DataLoader(self.data_test, batch_size=len(self.data_test.sequences),shuffle=False)
     
-    
+    @override
     def val_dataloader(self):
         if self.data_val is None:
-            raise ValueError("Training data not found.")
+            raise ValueError("Validation data not found.")
         return DataLoader(self.data_val, batch_size=self.batch_size, shuffle=False)
-
-def generate(window_size,test_data:pd.DataFrame):
-        hdfs_dict = {}
-        labels_dict = {}
-        length = 0
-        for index,row in test_data.iterrows():
-            # Convert strings to integers and shift by -1
-            row_list = row['seq'].split(',')
-            ln = list(map(lambda n: int(n) - 1, row_list))
-            # Pad with -1 to the required length
-            ln = ln + [-1] * (window_size + 1 - len(ln))
-            seq_count = hdfs_dict.get(tuple(ln), 0) + 1
-            hdfs_dict[tuple(ln)] = seq_count
-            labels_dict[tuple(ln)] = row['label']
-            length += 1
-        return hdfs_dict, labels_dict,length
 
 if __name__ == "__main__":
 
@@ -193,18 +177,6 @@ if __name__ == "__main__":
     module.setup()
     for seq, pair in iter(module.test_dataloader()):
         print(seq,pair)
-    # module.setup()
-    # for seq, label in iter(module.train_dataloader()):
-    #    print(seq)
-    #    print('--------------------')
-    #    print(len(label))
+    
                            
-    # test_normal = pd.read_csv('../datasets/hdfs_datasets/test_normal.csv',header=None,delimiter=' ')
-    # test_abnormal = pd.read_csv('../datasets/hdfs_datasets/test_abnormal.csv',header=None,delimiter=' ')
-    # test_normal['label']=0
-    # test_abnormal['label']=1
-    # test = pd.concat([test_normal,test_abnormal])
-    # test.to_csv('../datasets/hdfs_datasets/test.csv',index=False)
-    #test=pd.read_csv('../datasets/hdfs_datasets/test.csv')
-    #hdfs,labels,length = generate(10,test)
-    #print(hdfs)
+    

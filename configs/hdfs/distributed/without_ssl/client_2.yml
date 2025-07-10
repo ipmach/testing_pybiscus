@@ -10,6 +10,8 @@ model:
     n_classes: 33
     lr: 0.01
     n_layers: 2
+    num_candidates: 9
+    window_size: 10
 data:
   name: hdfs
   config:

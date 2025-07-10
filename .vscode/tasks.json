@@ -1,0 +1,45 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "server hdfs",
+            "type": "shell",
+            "command": " source .venv/bin/activate &&  source ./extend_path.sh && pybiscus server launch configs/hdfs/distributed/without_ssl/server.yml",
+            "problemMatcher": []
+        }, 
+        {
+            "label": "client1 hdfs",
+            "type": "shell",
+            "command": " source .venv/bin/activate &&  source ./extend_path.sh && pybiscus client launch configs/hdfs/distributed/without_ssl/client_1.yml",
+            "problemMatcher": []
+        }, 
+        {
+            "label": "client2 hdfs",
+            "type": "shell",
+            "command": " source .venv/bin/activate &&  source ./extend_path.sh && pybiscus client launch configs/hdfs/distributed/without_ssl/client_2.yml",
+            "problemMatcher": []
+        }, 
+        {
+            "label": "server cifar",
+            "type": "shell",
+            "command": " source .venv/bin/activate &&  source ./extend_path.sh && pybiscus server launch configs/cifar10_cnn/distributed/without_ssl/server.yml",
+            "problemMatcher": []
+        }, 
+        {
+            "label": "client1 cifar",
+            "type": "shell",
+            "command": " source .venv/bin/activate &&  source ./extend_path.sh && pybiscus client launch configs/cifar10_cnn/distributed/without_ssl/client_1.yml",
+            "problemMatcher": []
+        }, 
+        {
+            "label": "client2 cifar",
+            "type": "shell",
+            "command": " source .venv/bin/activate &&  source ./extend_path.sh && pybiscus client launch configs/cifar10_cnn/distributed/without_ssl/client_2.yml",
+            "problemMatcher": []
+        }, 
+
+    ]
+}
+
