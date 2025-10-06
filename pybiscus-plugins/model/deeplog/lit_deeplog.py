@@ -115,7 +115,6 @@ class LitDeeplog(pl.LightningModule):
 
         self.model       = DeepLog(input_size=self.input_shape, hidden_size=self.mid_shape, num_layers=self.n_layers, num_keys=self.n_classes)
         self.loss        = nn.CrossEntropyLoss()
-        #self.accuracy    = Accuracy(task="multiclass", num_classes=self.n_classes, top_k=1)
         self._signature  = DeeplogSignature
 
     @property
@@ -203,7 +202,7 @@ class LitDeeplog(pl.LightningModule):
 
         #outputs = self.forward(log)
         #loss    = self.loss(outputs, labels)
-        loss=0
+        f1_score=0
 
         # log, targets = batch
 
@@ -260,7 +259,7 @@ class LitDeeplog(pl.LightningModule):
         #         #self.log("val_acc",  acc,  prog_bar=True)
 
         #     return {"loss": loss}
-        return {"loss": loss}
+        return {"f1_score": f1_score}
         
 
     @override
