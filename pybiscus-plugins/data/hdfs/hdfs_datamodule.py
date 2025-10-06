@@ -18,18 +18,13 @@ class HDFSDataset(Dataset):
 
     def read_data(self,data_path):
         with open(data_path, 'r') as read_obj: 
-  
             # Return a reader object which will 
             # iterate over lines in the given csvfile 
             csv_reader = csv.reader(read_obj) 
-        
             # convert string to list 
             list_of_csv = list(csv_reader) 
-            
             list_of_csv = list(map(lambda x: [int(xi) for xi in x], list_of_csv))
-
-            data, label = self.preprocess_data(list_of_csv)
-        
+            data, label = self.preprocess_data(list_of_csv)       
         return data,label
 
     def preprocess_data(self,data):
@@ -62,8 +57,7 @@ class HDFSTestDataset(Dataset):
         super().__init__()
         self.window_size = window_size
         self.sequences, self.counts,self.labels = self.read_data(data_path)
-
-    
+  
     def pad_list_of_lists(self,sequences,pad_value=0):
         max_len = max(len(seq) for seq in sequences)
         return [list(seq) + [pad_value] * (max_len - len(seq)) for seq in sequences]
@@ -75,8 +69,7 @@ class HDFSTestDataset(Dataset):
         counts = list(hdfs_dict.values())
         labels = list(labels_dict.values())
         sequences_padded = self.pad_list_of_lists(sequences,pad_value=-99)
-        return sequences_padded,counts,labels
-    
+        return sequences_padded,counts,labels  
 
     def generate(self,test_data:pd.DataFrame):
         hdfs_dict = {}
