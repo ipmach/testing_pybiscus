@@ -203,7 +203,7 @@ class LitDeeplog(pl.LightningModule):
 
         #outputs = self.forward(log)
         #loss    = self.loss(outputs, labels)
-
+        loss=0
 
         # log, targets = batch
 
@@ -260,6 +260,7 @@ class LitDeeplog(pl.LightningModule):
         #         #self.log("val_acc",  acc,  prog_bar=True)
 
         #     return {"loss": loss}
+        return {"loss": loss}
         
 
     @override
