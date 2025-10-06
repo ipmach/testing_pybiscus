@@ -78,7 +78,6 @@ class HDFSTestDataset(Dataset):
         return sequences_padded,counts,labels
     
 
-
     def generate(self,test_data:pd.DataFrame):
         hdfs_dict = {}
         labels_dict = {}
