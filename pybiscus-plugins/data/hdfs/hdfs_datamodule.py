@@ -105,8 +105,6 @@ class HDFSDataModule(pl.LightningDataModule):
         self, 
         train_file: str | None = None, 
         test_file: str | None = None, 
-        #test_file_normal: str | None = None, 
-        #test_file_abnormal: str | None = None, 
         val_file: str | None = None, 
         batch_size: int = 32, 
         window_size: int = 10,
@@ -120,16 +118,7 @@ class HDFSDataModule(pl.LightningDataModule):
 
     def setup(self, stage: str=None):
         """
-        Data downloaded according to stage:
-
-                   | Train | Val | Test |
-            -----------------------------
-            "fit"  |   X   |  X  |  _   |
-            -----------------------------
-            "test" |   _   |  _  |  X   |
-            -----------------------------
-            None   |   X   |  X  |  X   |
-            -----------------------------
+        Data downloaded according to stage.
         """
         if stage == "fit" or stage is None:
             if self.train_file is not None:
@@ -168,9 +157,6 @@ class HDFSDataModule(pl.LightningDataModule):
         return DataLoader(self.data_val, batch_size=self.batch_size, shuffle=False)
 
 if __name__ == "__main__":
-
-    # hdfs_dataset = HDFSDataset('../datasets/hdfs_datasets/test_abnormal.csv',10)
-    # print(hdfs_dataset[0])
 
     module = HDFSDataModule(test_file='../datasets/hdfs_datasets/test.csv',batch_size=32,window_size=10)
     module.setup()
