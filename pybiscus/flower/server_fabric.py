@@ -96,7 +96,7 @@ def fit_config(server_round: int):
     """Return training configuration dict for each round."""
     config = {
         "server_round": server_round,  # The current round of federated learning
-        "local_epochs": 30,  # if server_round < 2 else 2,  #
+        "local_epochs": 50,  # if server_round < 2 else 2,  #
     }
     return config
 
