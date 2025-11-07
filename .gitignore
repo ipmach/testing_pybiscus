@@ -17,4 +17,5 @@ pybiscus-plugins/models/others
 
 # Datasets
 
-datasets/
+datasets/client1
+datasets/global_test
