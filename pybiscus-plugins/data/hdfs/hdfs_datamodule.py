@@ -52,46 +52,46 @@ class HDFSDataset(Dataset):
         return torch.tensor(self.data[idx], dtype=torch.float), self.labels[idx]
     
 
-class HDFSValDataset(Dataset):
-    def __init__(self, data_path, window_size):
-        super().__init__()
-        self.window_size = window_size
-        self.sequences, self.counts,self.labels = self.read_data(data_path)
+# class HDFSValDataset(Dataset):
+#     def __init__(self, data_path, window_size):
+#         super().__init__()
+#         self.window_size = window_size
+#         self.sequences, self.counts,self.labels = self.read_data(data_path)
   
-    def pad_list_of_lists(self,sequences,pad_value=0):
-        max_len = max(len(seq) for seq in sequences)
-        return [list(seq) + [pad_value] * (max_len - len(seq)) for seq in sequences]
+#     def pad_list_of_lists(self,sequences,pad_value=0):
+#         max_len = max(len(seq) for seq in sequences)
+#         return [list(seq) + [pad_value] * (max_len - len(seq)) for seq in sequences]
 
-    def read_data(self,data_path):
-        test_data = pd.read_csv(data_path)
-        hdfs_dict, labels_dict, length = self.generate(test_data)
-        sequences = list(hdfs_dict.keys())
-        counts = list(hdfs_dict.values())
-        labels = list(labels_dict.values())
-        sequences_padded = self.pad_list_of_lists(sequences,pad_value=-99)
-        return sequences_padded,counts,labels  
+#     def read_data(self,data_path):
+#         test_data = pd.read_csv(data_path)
+#         hdfs_dict, labels_dict, length = self.generate(test_data)
+#         sequences = list(hdfs_dict.keys())
+#         counts = list(hdfs_dict.values())
+#         labels = list(labels_dict.values())
+#         sequences_padded = self.pad_list_of_lists(sequences,pad_value=-99)
+#         return sequences_padded,counts,labels  
 
-    def generate(self,test_data:pd.DataFrame):
-        hdfs_dict = {}
-        labels_dict = {}
-        length = 0
-        for index,row in test_data.iterrows():
-            # Convert strings to integers and shift by -1
-            row_list = row['seq'].split(',')
-            ln = list(map(lambda n: int(n) - 1, row_list))
-            # Pad with -1 to the required length
-            ln = ln + [-1] * (self.window_size + 1 - len(ln))
-            seq_count = hdfs_dict.get(tuple(ln), 0) + 1
-            hdfs_dict[tuple(ln)] = seq_count
-            labels_dict[tuple(ln)] = row['label']
-            length += 1
-        return hdfs_dict, labels_dict,length
+#     def generate(self,test_data:pd.DataFrame):
+#         hdfs_dict = {}
+#         labels_dict = {}
+#         length = 0
+#         for index,row in test_data.iterrows():
+#             # Convert strings to integers and shift by -1
+#             row_list = row['seq'].split(',')
+#             ln = list(map(lambda n: int(n) - 1, row_list))
+#             # Pad with -1 to the required length
+#             ln = ln + [-1] * (self.window_size + 1 - len(ln))
+#             seq_count = hdfs_dict.get(tuple(ln), 0) + 1
+#             hdfs_dict[tuple(ln)] = seq_count
+#             labels_dict[tuple(ln)] = row['label']
+#             length += 1
+#         return hdfs_dict, labels_dict,length
 
-    def __len__(self):
-        return len(self.sequences)
+#     def __len__(self):
+#         return len(self.sequences)
 
-    def __getitem__(self, idx):
-        return torch.tensor(self.sequences[idx], dtype=torch.float), tuple([self.counts[idx],self.labels[idx]])
+#     def __getitem__(self, idx):
+#         return torch.tensor(self.sequences[idx], dtype=torch.float), tuple([self.counts[idx],self.labels[idx]])
     
 class HDFSTestDataset(Dataset):
     def __init__(self, data_path, window_size):
@@ -160,10 +160,16 @@ class HDFSDataModule(pl.LightningDataModule):
             else: 
                 self.data_train = None
             
+            # if self.val_file is not None:
+            #     self.data_val = HDFSValDataset(data_path=self.val_file,window_size=self.window_size)
+            # else:
+            #     self.data_val = None
+            
             if self.val_file is not None:
-                self.data_val = HDFSValDataset(data_path=self.val_file,window_size=self.window_size)
-            else:
+                self.data_val = HDFSDataset(data_path=self.val_file,window_size=self.window_size)
+            else: 
                 self.data_val = None
+
 
         if stage == "test" or stage is None:
             if self.test_file is not None:
@@ -188,7 +194,7 @@ class HDFSDataModule(pl.LightningDataModule):
     def val_dataloader(self):
         if self.data_val is None:
             raise ValueError("Validation data not found.")
-        return DataLoader(self.data_val, batch_size=len(self.data_val.sequences), shuffle=False)
+        return DataLoader(self.data_val, batch_size=self.batch_size, shuffle=False)
 
 if __name__ == "__main__":
 

@@ -24,8 +24,7 @@ data:
       batch_size: 512
       window_size: 10
 server_adress: ${oc.env:SERVICE, "[::]:22222" }
-num_rounds: 5
+num_rounds: 7
 client_configs:
-  - ${root_dir}/configs/hdfs/distributed/without_ssl/client_1.yml
-  - ${root_dir}/configs/hdfs/distributed/without_ssl/client_2.yml
-
+  - ${root_dir}/configs/hdfs/distributed/without_ssl/setting_2_clients/client_1.yml
+  - ${root_dir}/configs/hdfs/distributed/without_ssl/setting_2_clients/client_2.yml

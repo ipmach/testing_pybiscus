@@ -1,4 +1,4 @@
-cid: 1
+cid: 3
 fabric:
   accelerator: cpu
 root_dir: ${oc.env:PWD}
@@ -15,8 +15,8 @@ model:
 data:
   name: hdfs
   config:
-    train_file: ${root_dir}/datasets/hdfs_datasets/train0.csv
-    val_file: ${root_dir}/datasets/hdfs_datasets/test.csv
+    train_file: ${root_dir}/datasets/hdfs_datasets/setting_5_clients/train2.csv
+    val_file: ${root_dir}/datasets/hdfs_datasets/setting_5_clients/val2.csv
     batch_size: 512
     window_size: 10
 server_adress: ${oc.env:SERVER_ADDRESS, "localhost:22222" }

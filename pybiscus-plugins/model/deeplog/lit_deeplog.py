@@ -146,64 +146,6 @@ class LitDeeplog(pl.LightningModule):
 
         if isinstance(targets,list):
             print('SERVER CASE')
-
-            counts = targets[0]
-            labels = targets[1]
-
-            TP = 0
-            FP = 0
-            FN = 0 
-            for line,count,label in tqdm(zip(log,counts,labels)):
-                matches = (line == -99).nonzero()
-                stop_idx = matches[0][0].item() if matches.numel() > 0 else line.shape[0]
-                for i in range(stop_idx - self.window_size):
-                    seq0 = line[i:i + self.window_size]
-                    next_event = line[i + self.window_size]
-
-
-                    seq0 = torch.tensor(seq0, dtype=torch.float).clone().detach().view(
-                        -1, self.window_size, self.input_shape)
-                    next_event = torch.tensor(next_event).clone().detach().view(-1)
-                    output = self.forward(seq0)
-              
-                    predicted = torch.argsort(output,
-                                              1)[0][-self.num_candidates:]
-
-                    if next_event not in predicted: 
-                        if label.item() == 1:
-                            TP += count.item()
-                            break
-                        else:
-                            FP += count.item()
-                            break
-
-            counts_abnormal=[ count.item() for count,label in zip(counts,labels) if label.item()==1]
-            FN = sum(counts_abnormal) - TP
-            try:
-                P = 100 * TP / (TP + FP)
-                R = 100 * TP / (TP + FN)
-                F1 = 2 * P * R / (P + R)
-            
-                print('false positive (FP): {}, false negative (FN): {}, Precision: {:.3f}%, Recall: {:.3f}%, F1-measure: {:.3f}%'
-                .format(FP, FN, P, R, F1))
-
-                
-            except:
-                print('false positive (FP): {}, false negative (FN): {}, TP: {}'
-                .format(FP, FN, TP))
-                F1 = 0
-            
-            if self._logging:
-                self.log("f1score", F1, prog_bar=True)       
-
-            return {"loss": 0, "f1score": F1}
-        else: 
-            print('CLIENT CASE')
-            # outputs = self.forward(log)
-            # loss    = self.loss(outputs, targets)
-            # print(loss)
-            #acc     = self.accuracy(torch.max(outputs.data, 1)[1], labels)
-
             counts = targets[0]
             labels = targets[1]
 
@@ -240,15 +182,28 @@ class LitDeeplog(pl.LightningModule):
             R = 100 * TP / (TP + FN)
             F1 = 2 * P * R / (P + R)
             print('false positive (FP): {}, false negative (FN): {}, Precision: {:.3f}%, Recall: {:.3f}%, F1-measure: {:.3f}%'
-                .format(FP, FN, P, R, F1))   
+                .format(FP, FN, P, R, F1))  
 
             if self._logging:
-                self.log("f1-score", F1, prog_bar=True)
-                #self.log("val_acc",  acc,  prog_bar=True)    
+                self.log("f1score", F1, prog_bar=True)           
 
-            return {"loss": 0, "f1_score": F1}
+            return {"loss": 0, "f1score": F1}
+        
+        else: 
+            print('CLIENT CASE')
+            outputs = self.forward(log)
+            loss    = self.loss(outputs, targets)
+            print(loss)
+            #acc     = self.accuracy(torch.max(outputs.data, 1)[1], labels)
 
+            if self._logging:
+                self.log("val_loss", loss, prog_bar=True)
+                #self.log("val_acc",  acc,  prog_bar=True)
 
+            return {"loss": loss, "f1score": 0}
+ 
+
+         
     #@override
     def test_step(self, batch: torch.Tensor, batch_idx) -> torch.Tensor:
 
@@ -311,7 +266,7 @@ class LitDeeplog(pl.LightningModule):
         #         #self.log("val_acc",  acc,  prog_bar=True)
 
         #     return {"loss": loss}
-        return {"f1_score": f1_score}
+        return {"f1score": f1_score}
         
 
     @override
